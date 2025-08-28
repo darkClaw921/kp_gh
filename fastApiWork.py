@@ -1,4 +1,5 @@
 import time
+import traceback
 # import redisWork
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import JSONResponse
@@ -80,11 +81,15 @@ async def update_event(request: Request):
     
     event = data.get('PLACEMENT')
     if event == 'CRM_DEAL_DETAIL_ACTIVITY':
-        event = data.get('PLACEMENT_OPTIONS')
-        event = json.loads(event)
-        dealID = event.get('ID')
-        event = await main(dealID)
-        pprint(event)
+        try:
+            event = data.get('PLACEMENT_OPTIONS')
+            event = json.loads(event)
+            dealID = event.get('ID')
+            event = await main(dealID)
+            pprint(event)
+        except Exception as e:
+            error=traceback.format_exc()
+            return JSONResponse(content={'message': 'Ошибка при генерации КП', 'error': error})
         
     # print(f"{event=}")
     
