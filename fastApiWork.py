@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import json
 from urllib.parse import parse_qs
 import os
+from workBitrix import main
 # from loguru import logger
 
 # log = logger()
@@ -66,6 +67,7 @@ async def _parse_request_data(request: Request) -> dict:
     # 4) Пусто
     return {}
 
+
 @app.post('/event')
 async def update_event(request: Request):
     """Обновление сущности"""
@@ -75,14 +77,16 @@ async def update_event(request: Request):
     data = await _parse_request_data(request)
     pprint(data)
 
-    # поддержка разных регистров и ключей
-    event = (
-        data.get('event')
-        or data.get('EVENT')
-        or data.get('type')
-        or data.get('TYPE')
-    )
-    print(f"{event=}")
+    
+    event = data.get('PLACEMENT')
+    if event == 'CRM_DEAL_DETAIL_ACTIVITY':
+        event = data.get('PLACEMENT_OPTIONS')
+        event = json.loads(event)
+        dealID = event.get('ID')
+        event = await main(dealID)
+        pprint(event)
+        
+    # print(f"{event=}")
     
     # if event == 'ONCALENDARENTRYADD':
     #     eventID = data['data[id]']
@@ -103,7 +107,8 @@ async def update_event(request: Request):
     #     taskID = data['data[FIELDS_BEFORE][ID]']
     #     await create_billing_for_task(taskID=taskID)
 
-    return JSONResponse(content={'message': 'OK', 'event': event})
+    # return JSONResponse(content={'message': 'Файл КП сгенерирован', 'event': event})
+    return JSONResponse(content={'message': 'Файл КП сгенерирован'})
 
 # async def update_event_local(request: dict):
 #     """Обновление сущности"""

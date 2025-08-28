@@ -527,9 +527,9 @@ def create_calculation_html(
     
     return output_path
 
-def main():
+async def main(dealID):
     from workBitrix import get_all_info
-    frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram= asyncio.run(get_all_info(8076))
+    frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram= asyncio.run(get_all_info(dealID))
     
 #     create_calculation_doc(
 #         stone_type="изумрудно-зеленый",
