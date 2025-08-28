@@ -90,7 +90,7 @@ async def update_event(request: Request):
         except Exception as e:
             error=traceback.format_exc()
             #utf8
-            return JSONResponse(content={'message': 'Ошибка при генерации КП'.encode('utf-8').decode('utf-8'), 'error': error})
+            return JSONResponse(content={'message': 'Ошибка при генерации КП'.encode('utf-8'), 'error': error})
         
     # print(f"{event=}")
     
