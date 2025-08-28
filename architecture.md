@@ -27,6 +27,9 @@
      - декодирует все `data:image/*;base64` и транскодирует их в PNG через `Pillow`, затем подменяет на `data:image/png;base64`
      - конвертирует подготовленный HTML в PDF (`wkhtmltopdf` с `enable-local-file-access`, `encoding=utf-8`)
      - вставляет полученную страницу в `base_pdf_path` после `insert_after_page`
+ - `fastApiWork.py` - FastAPI-приложение для приёма вебхуков и событий
+   - эндпойнт `/event` — обработчик входящих событий Bitrix24
+   - вспомогательная функция `_parse_request_data(request)` — универсальный парсер тела запроса (JSON → form-urlencoded → raw body)
 
 ## Зависимости
 - `fast_bitrix24` - Библиотека для работы с API Bitrix24

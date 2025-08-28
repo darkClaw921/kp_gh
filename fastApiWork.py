@@ -10,6 +10,8 @@ from datetime import datetime
 
 import asyncio
 from dotenv import load_dotenv
+import json
+from urllib.parse import parse_qs
 import os
 # from loguru import logger
 
@@ -33,17 +35,53 @@ app.add_middleware(
 
 
 
+async def _parse_request_data(request: Request) -> dict:
+    """Парсинг тела запроса: JSON -> form-urlencoded -> raw/querystring.
+    Возвращает словарь, гарантируя устойчивость к неверному Content-Type.
+    """
+    # 1) Попытка JSON
+    try:
+        return await request.json()
+    except Exception:
+        pass
+
+    # 2) Попытка form-urlencoded / multipart
+    try:
+        form = await request.form()
+        if form:
+            return {k: form.get(k) for k in form.keys()}
+    except Exception:
+        pass
+
+    # 3) Попытка raw body как form-urlencoded
+    try:
+        raw = await request.body()
+        if raw:
+            parsed = parse_qs(raw.decode(errors="ignore"))
+            # parse_qs возвращает список значений; берем последнее
+            return {k: (v[-1] if isinstance(v, list) and v else v) for k, v in parsed.items()}
+    except Exception:
+        pass
+
+    # 4) Пусто
+    return {}
+
 @app.post('/event')
 async def update_event(request: Request):
     """Обновление сущности"""
     request_data = request.__dict__
     pprint(request_data)
-    data = await request.json()
-    # form_data = await request.form()
-    # data = {key: form_data[key] for key in form_data.keys()}
+
+    data = await _parse_request_data(request)
     pprint(data)
 
-    event = data.get('event')
+    # поддержка разных регистров и ключей
+    event = (
+        data.get('event')
+        or data.get('EVENT')
+        or data.get('type')
+        or data.get('TYPE')
+    )
     print(f"{event=}")
     
     # if event == 'ONCALENDARENTRYADD':
@@ -65,7 +103,7 @@ async def update_event(request: Request):
     #     taskID = data['data[FIELDS_BEFORE][ID]']
     #     await create_billing_for_task(taskID=taskID)
 
-    return JSONResponse(content={'message': 'OK'})
+    return JSONResponse(content={'message': 'OK', 'event': event})
 
 # async def update_event_local(request: dict):
 #     """Обновление сущности"""
