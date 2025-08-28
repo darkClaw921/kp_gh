@@ -1,0 +1,19 @@
+[project]
+name = "kp-gh"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fast-bitrix24>=1.8.4",
+    "fastapi>=0.116.1",
+    "fpdf2>=2.8.3",
+    "loguru>=0.7.3",
+    "pdfkit>=1.0.0",
+    "pypdf>=5.5.0",
+    "python-docx>=1.1.2",
+    "python-dotenv>=1.1.0",
+    "requests>=2.32.5",
+    "uvicorn>=0.35.0",
+    "weasyprint>=65.1",
+]

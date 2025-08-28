@@ -1,0 +1,32 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.bmp
+*.tiff
+*.ico
+*.heic
+*.html
+*.docx
+*.doc
+*.pdf
+*.txt
+*.csv
+*.json
+*.xml
+*.yaml
+*.yml
+*.bin
