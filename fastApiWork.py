@@ -36,9 +36,12 @@ app.add_middleware(
 @app.post('/event')
 async def update_event(request: Request):
     """Обновление сущности"""
-    form_data = await request.form()
-    data = {key: form_data[key] for key in form_data.keys()}
-    pprint(data)
+    request_data = request.__dict__
+    pprint(request_data)
+    data = request.json()
+    # form_data = await request.form()
+    # data = {key: form_data[key] for key in form_data.keys()}
+    # pprint(data)
 
     event = data.get('event')
     print(f"{event=}")
