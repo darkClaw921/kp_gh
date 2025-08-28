@@ -38,7 +38,7 @@ async def update_event(request: Request):
     """Обновление сущности"""
     request_data = request.__dict__
     pprint(request_data)
-    data = request.json()
+    data = await request.json()
     # form_data = await request.form()
     # data = {key: form_data[key] for key in form_data.keys()}
     pprint(data)
