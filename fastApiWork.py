@@ -41,7 +41,7 @@ async def update_event(request: Request):
     data = request.json()
     # form_data = await request.form()
     # data = {key: form_data[key] for key in form_data.keys()}
-    # pprint(data)
+    pprint(data)
 
     event = data.get('event')
     print(f"{event=}")
