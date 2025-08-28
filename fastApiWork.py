@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import json
 from urllib.parse import parse_qs
 import os
-from workBitrix import main
+from main import main
 # from loguru import logger
 
 # log = logger()
