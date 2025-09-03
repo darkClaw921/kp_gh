@@ -288,15 +288,7 @@ def create_calculation_html(
                     except Exception as e:
                         print(f"Ошибка при чтении изображения {path}: {e}")
     
-    # Применяем цвета для отсутствующих изображений
-    if not image_data['default']:
-        image_data['default'] = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Crect%20fill%3D%22%23228B22%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3C%2Fsvg%3E"
-    if not image_data['dry']:
-        image_data['dry'] = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Crect%20fill%3D%22%23006400%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3C%2Fsvg%3E"
-    if not image_data['wet']:
-        image_data['wet'] = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Crect%20fill%3D%22%23008000%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3C%2Fsvg%3E"
-    if not image_data['lit']:
-        image_data['lit'] = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Crect%20fill%3D%22%2332CD32%22%20width%3D%22120%22%20height%3D%22120%22%2F%3E%3C%2Fsvg%3E"
+    # Убираем SVG-заглушки - теперь отображаем только существующие изображения
     
     # Настройка упаковки
     packaging_options = {
@@ -306,6 +298,28 @@ def create_calculation_html(
     }
     if packaging in packaging_options:
         packaging_options[packaging] = True
+    
+    # Генерация ячеек с изображениями только для существующих
+    image_cells = ""
+    image_labels = {
+        'default': '',
+        'dry': '',
+        'wet': '', 
+        'lit': ''
+    }
+    # image_labels = {
+    #     'default': '',
+    #     'dry': 'сухой',
+    #     'wet': 'влажный', 
+    #     'lit': 'подсвеченный'
+    # }
+    
+    for key, label in image_labels.items():
+        if image_data[key]:  # Если изображение существует
+            if label:  # Если есть подпись
+                image_cells += f'<td style="border:none;"><img src="{image_data[key]}" alt="Камень {label}" style="width:130px; height:130px; object-fit:cover;"><br><span style="font-size:14px;">{label}</span></td>'
+            else:  # Для default без подписи
+                image_cells += f'<td style="border:none;"><img src="{image_data[key]}" alt="Камень" style="width:130px; height:130px; object-fit:cover;"><br></td>'
     
     # HTML шаблон
     html_template = f"""<!DOCTYPE html>
@@ -431,23 +445,7 @@ def create_calculation_html(
                 <td>
                     <table style="width:100%; border:none; border-collapse:collapse; text-align:center;">
                         <tr>
-                            <td style="border:none;">
-                                <img src="{image_data['default']}" alt="Камень" style="width:130px; height:130px; object-fit:cover;"><br>
-                            </td>
-                            <!--
-                            <td style="border:none;">
-                                <img src="{image_data['dry']}" alt="Камень сухой" style="width:130px; height:130px; object-fit:cover;"><br>
-                                <span style="font-size:14px;">сухой</span>
-                            </td>
-                            <td style="border:none;">
-                                <img src="{image_data['wet']}" alt="Камень влажный" style="width:130px; height:130px; object-fit:cover;"><br>
-                                <span style="font-size:14px;">влажный</span>
-                            </td>
-                            <td style="border:none;">
-                                <img src="{image_data['lit']}" alt="Камень подсвеченный" style="width:130px; height:130px; object-fit:cover;"><br>
-                                <span style="font-size:14px;">подсвеченный</span>
-                            </td>
-                            -->
+                            {image_cells}
                         </tr>
                     </table>
                 </td>
@@ -786,4 +784,5 @@ async def main(dealID):
             continue
 
 if __name__ == "__main__":
-    asyncio.run(main(8342))
+    # asyncio.run(main(8342))
+    asyncio.run(main(8442))

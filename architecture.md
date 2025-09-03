@@ -3,6 +3,8 @@
 ## Структура проекта
 - `main.py` - Главный файл проекта
 - `workBitrix.py` - Функции для работы с Bitrix24 API
+- `parser_site/parse_page.py` - Парсер HTML-страниц каталога
+- `parser_site/page_1.html` - Локальный HTML для парсинга (пример страницы каталога)
 - `test.py` - Файл для тестирования
 - `индивидуальный_расчет.docx` - Документ Word с расчетом
 - `индивидуальный_расчет.pdf` - PDF версия документа с расчетом
@@ -19,6 +21,13 @@
   - `create_calculation_html()` - Функция для генерации HTML-карточек товаров с расчетом
   - `replace_date_placeholder()` - Функция для замены текста "{дата+3}" на "21.03.25" в PDF файлах
 - `workBitrix.py` - Содержит функции для взаимодействия с API Bitrix24
+  - `get_all_info(deal_id)` - Получает информацию о сделке и товарах, включая изображения из поля property160 товара
+  - `download_images(url, namefield, productId, fileId)` - Скачивает изображения из Bitrix24 по API
+  - `create_product(product_name, product_price, product_quantity, file_name_path, isBase64)` - Создает товар в каталоге
+- `parser_site/parse_page.py` - Скрипт парсинга карточек каталога из HTML
+  - `parse_catalog_items(html_text, base_url, download_images)` — извлекает список карточек с полями: `name`, `price`, `link`, `image`, `image_base64`
+  - `_download_image_to_base64(image_url, base_url)` — загружает изображение и конвертирует в base64 формат `{'fileData': [filename, encoded_data]}`
+  - CLI-параметры: `input` (путь к HTML), `--out` (путь к JSON/CSV), `--format` (`json|csv`), `--base-url` (базовый URL для изображений), `--download-images` (загружать изображения в base64)
 - `индивидуальный_расчет.html` - HTML-версия карточки товара с индивидуальным расчетом, содержит таблицу с информацией о камне, его характеристиках, объеме, весе и цене. Включает CSS стили для корректного отображения таблицы с фиксированными размерами колонок (25%, 50%, 25%) и предотвращения выхода контента за границы
 - `индивидуальный_расчет.docx` - Документ Word с аналогичной информацией
 - `индивидуальный_расчет.pdf` - PDF документ с аналогичной информацией

@@ -110,7 +110,7 @@ async def download_images(url:str, namefield:str,productId:int,fileId:int):
         else:
             ext = '.png'
         # file_name = f"{main_dir}/{productId}_{namefield}{ext}"
-        file_name = f"{productId}_{namefield}{ext}"
+        file_name = f"{productId}_{namefield}_{fileId}{ext}"
         with open(file_name, 'wb') as f:
             f.write(resp.content)
         return file_name
@@ -129,6 +129,43 @@ async def upload_file_to_deal(deal_id,file_name):
         Deal.fileKP: {"fileData": [os.path.basename(file_name), str(encoded_file)]}
     }
     await bit.call('crm.deal.update', {'ID': deal_id, 'FIELDS': fields})
+
+
+async def create_product(product_name,product_price,product_quantity,file_name_path, isBase64=True):
+    """
+    file_name_path: str - имя файла
+    
+    """
+    if isBase64:
+        import base64
+
+        with open(file_name_path, "rb") as file:
+            encoded_file = base64.b64encode(file.read()).decode('utf-8')
+
+        # detailPicture={
+        #             'fileData': [
+        #             os.path.basename(file_name_path),
+        #             str(encoded_file)
+        #         ]
+        #     }
+        previewPicture={
+                    'fileData': [
+                    os.path.basename(file_name_path),
+                    str(encoded_file)
+                ]
+            }
+    else:
+        # detailPicture=file_name_path
+        previewPicture=file_name_path
+    product = await bit.call('catalog.product.add', {'fields': {'name': product_name, 
+                                                                'price': product_price, 
+                                                                'quantity': product_quantity, 
+                                                                'iblockId': 14, 
+                                                                'iblockSectionId':162, #торговый каталог/Изображения для кп/эрклез 
+                                                                # 'detailPicture':detailPicture,
+                                                                'previewPicture':previewPicture,
+                                                                }})
+    return product
 
 
 async def get_all_info(deal_id):
@@ -158,15 +195,52 @@ async def get_all_info(deal_id):
     # print(f'productName: {productName}')
     # print(f'productPrice: {productPrice}')
     images={'default': 'path', 'dry': 'path', 'wet': 'path', 'lit': 'path'}
-    imagesPreviewPicture = await download_images(url=product['previewPicture']['url'],
-                                   namefield='previewPicture',
-                                   productId=product['id'],
-                                   fileId=product['previewPicture']['id'])
     
-    images['default']=imagesPreviewPicture
-    images['dry']=imagesPreviewPicture
-    images['wet']=imagesPreviewPicture
-    images['lit']=imagesPreviewPicture
+    # Получаем все изображения из поля property160
+    if 'property160' in product and product['property160']:
+        image_list = product['property160']
+        image_paths = []
+        
+        # Скачиваем все изображения из массива
+        for i, image_data in enumerate(image_list):
+            if 'value' in image_data and 'id' in image_data['value']:
+                file_id = image_data['value']['id']
+                url = image_data['value']['url']
+                
+                downloaded_image = await download_images(
+                    url=url,
+                    namefield='property160',
+                    productId=product['id'],
+                    fileId=file_id
+                )
+                if downloaded_image:
+                    image_paths.append(downloaded_image)
+        
+        # Распределяем изображения по типам
+        if len(image_paths) >= 4:
+            images['default'] = image_paths[0]
+            images['dry'] = image_paths[1] 
+            images['wet'] = image_paths[2]
+            images['lit'] = image_paths[3]
+        elif len(image_paths) > 0:
+            # Если изображений меньше 4, заполняем только доступные, остальные None
+            images['default'] = image_paths[0] if len(image_paths) > 0 else None
+            images['dry'] = image_paths[1] if len(image_paths) > 1 else None
+            images['wet'] = image_paths[2] if len(image_paths) > 2 else None
+            images['lit'] = image_paths[3] if len(image_paths) > 3 else None
+    else:
+        # Fallback на previewPicture если property160 отсутствует
+        if product.get('previewPicture'):
+            imagesPreviewPicture = await download_images(
+                url=product['previewPicture']['url'],
+                namefield='previewPicture',
+                productId=product['id'],
+                fileId=product['previewPicture']['id']
+            )
+            images['default'] = imagesPreviewPicture
+            images['dry'] = None
+            images['wet'] = None
+            images['lit'] = None
     # print(images)
 
     print(f'frakcia: {frakcia}')
@@ -180,7 +254,12 @@ async def get_all_info(deal_id):
     return frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram
 
 if __name__ == '__main__':
-    asyncio.run(get_all_info(8076))
+    # product_name='test1'
+    # product_price=100
+    # product_quantity=1
+    # file_name_path='Снимок экрана 2025-04-07 в 14.49.01.png'
+    # asyncio.run(create_product(product_name,product_price,product_quantity,file_name_path))
+    asyncio.run(get_all_info(8442))
 
 
 
