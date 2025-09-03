@@ -117,7 +117,7 @@ async def update_event(request: Request):
     #     await create_billing_for_task(taskID=taskID)
 
     # return JSONResponse(content={'message': 'Файл КП сгенерирован', 'event': event})
-    return JSONResponse(content={'message': 'Файл КП сгенерирован'})
+    return JSONResponse(content={'message': 'Файл КП сгенерирован'}, media_type='application/json; charset=utf-8')
 
 # async def update_event_local(request: dict):
 #     """Обновление сущности"""
