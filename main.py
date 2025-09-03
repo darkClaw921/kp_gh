@@ -249,6 +249,38 @@ def create_calculation_html(
     import os
     from base64 import b64encode
     
+    # Встраиваем шрифты в base64
+    open_sans_regular_base64 = ""
+    open_sans_medium_base64 = ""
+    
+    # Open Sans Regular для обычного текста
+    regular_path = "fonts/OpenSans-Regular.ttf"
+    if os.path.exists(regular_path):
+        try:
+            with open(regular_path, "rb") as font_file:
+                font_data = b64encode(font_file.read()).decode('utf-8')
+                open_sans_regular_base64 = f"data:font/truetype;charset=utf-8;base64,{font_data}"
+                print(f"Regular шрифт загружен: {len(font_data)} символов")
+        except Exception as e:
+            print(f"Ошибка при чтении шрифта {regular_path}: {e}")
+            open_sans_regular_base64 = ""
+    else:
+        print(f"Файл {regular_path} не найден")
+    
+    # Open Sans Medium для заголовков
+    medium_path = "fonts/open-sans-medium.ttf"
+    if os.path.exists(medium_path):
+        try:
+            with open(medium_path, "rb") as font_file:
+                font_data = b64encode(font_file.read()).decode('utf-8')
+                open_sans_medium_base64 = f"data:font/truetype;charset=utf-8;base64,{font_data}"
+                print(f"Medium шрифт загружен: {len(font_data)} символов")
+        except Exception as e:
+            print(f"Ошибка при чтении шрифта {medium_path}: {e}")
+            open_sans_medium_base64 = ""
+    else:
+        print(f"Файл {medium_path} не найден")
+    
     # Настройка изображений
     image_data = {
         'default': "",
@@ -333,12 +365,25 @@ def create_calculation_html(
             size: landscape;
             margin: 10mm;
         }}
-        body {{
-            font-family: Arial, sans-serif;
+        @font-face {{
+            font-family: 'Open Sans Regular';
+            src: url('{open_sans_regular_base64}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }}
+        @font-face {{
+            font-family: 'Open Sans Medium';
+            src: url('{open_sans_medium_base64}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }}
+        body {{  
             margin: 0;
             padding: 0;
-            width: 100%;
             height: 100%;
+            margin-left: 45px;
+            margin-right: 45px;
+            font-family: 'Open Sans Regular', Arial, sans-serif;
         }}
         .card {{
             width: 100%;
@@ -349,8 +394,9 @@ def create_calculation_html(
             flex-direction: column;
         }}
         h1 {{
-            font-size: 24px;
+            font-size: 30px;
             margin-bottom: 15px;
+            font-family: 'Open Sans Medium', Arial, sans-serif;
         }}
         table {{
             width: 100%;
@@ -369,11 +415,11 @@ def create_calculation_html(
         }}
         .stone-name {{
             font-size: 20px;
-            font-weight: bold;
+            font-family: 'Open Sans Medium', Arial, sans-serif;
         }}
         .stone-color {{
             font-size: 22px;
-            font-weight: bold;
+            font-family: 'Open Sans Medium', Arial, sans-serif;
         }}
         .stone-images {{
             display: flex;
@@ -393,7 +439,7 @@ def create_calculation_html(
         }}
         .fraction {{
             font-size: 20px;
-            font-weight: bold;
+            font-family: 'Open Sans Medium', Arial, sans-serif;
         }}
         .price {{
             font-size: 18px;
@@ -439,6 +485,7 @@ def create_calculation_html(
         <table class="main-table">
             <tr>
                 <td style="width: 25%;">
+                    <div class="stone-name">Эрклез</div>
                     <div class="stone-name">{stone_name}</div>
                     <div class="stone-color">{stone_type}</div>
                 </td>
@@ -772,8 +819,8 @@ async def main(dealID):
     else:
         print("Замена даты не выполнена")
     
-    from workBitrix import upload_file_to_deal
-    await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой_updated.pdf")
+    # from workBitrix import upload_file_to_deal
+    # await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой_updated.pdf")
 
     import os
     pprint(images)

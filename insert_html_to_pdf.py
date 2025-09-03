@@ -55,13 +55,19 @@ def insert_html_page_to_pdf(
     temp_pdf = 'temp_insert_page.pdf'
     options = {
         'orientation': 'Landscape',
-        'margin-top': '70mm',
+        # 'margin-top': '70mm',
+        'margin-top': '67mm',
         'margin-bottom': '0mm',
         'margin-left': '0mm',
         'margin-right': '50mm',
-        'enable-local-file-access': None,
+        'enable-local-file-access': True,
         'encoding': 'utf-8',
+        'footer-center': '',  # убираем нижний каллантитул
+        'footer-line': False,
+        'footer-font-size': '0',
+        'footer-spacing': '0'
     }
+    
     pdfkit.from_file(temp_html, temp_pdf, options=options)
     # 1/0
     # 3. Открываем исходный PDF и PDF с html-страницей
@@ -91,7 +97,7 @@ def insert_html_page_to_pdf(
     # 7. Копируем оставшиеся страницы
     for i in range(insert_after_page+1, len(base_reader.pages)):
         writer.add_page(base_reader.pages[i])
-
+    # 1/0
     # 8. Сохраняем результат
     with open(output_pdf_path, 'wb') as f:
         writer.write(f)

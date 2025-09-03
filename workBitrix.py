@@ -142,12 +142,12 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
         with open(file_name_path, "rb") as file:
             encoded_file = base64.b64encode(file.read()).decode('utf-8')
 
-        # detailPicture={
-        #             'fileData': [
-        #             os.path.basename(file_name_path),
-        #             str(encoded_file)
-        #         ]
-        #     }
+        detailPicture={
+                    'fileData': [
+                    os.path.basename(file_name_path),
+                    str(encoded_file)
+                ]
+            }
         previewPicture={
                     'fileData': [
                     os.path.basename(file_name_path),
@@ -155,15 +155,17 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
                 ]
             }
     else:
-        # detailPicture=file_name_path
+        detailPicture=file_name_path
         previewPicture=file_name_path
+        property160=file_name_path
     product = await bit.call('catalog.product.add', {'fields': {'name': product_name, 
                                                                 'price': product_price, 
                                                                 'quantity': product_quantity, 
                                                                 'iblockId': 14, 
                                                                 'iblockSectionId':162, #торговый каталог/Изображения для кп/эрклез 
-                                                                # 'detailPicture':detailPicture,
+                                                                'detailPicture':detailPicture,
                                                                 'previewPicture':previewPicture,
+                                                                'property160':property160,
                                                                 }})
     return product
 
@@ -171,7 +173,7 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
 async def get_all_info(deal_id):
     # deal_id=8076
     deal= await get_deal(deal_id)
-    print(deal)
+    # print(deal)
     frakcia=deal[Deal.frakcia]
     ypakovka=typeYpakovka[deal[Deal.ypakovka]]
     obem_po_porametram=deal[Deal.obem_po_porametram]
@@ -184,11 +186,11 @@ async def get_all_info(deal_id):
 
     opportunity=deal[Deal.opportunity]
 
-    print(frakcia,ypakovka,dostavka,opportunity)
+    # print(frakcia,ypakovka,dostavka,opportunity)
     products= await get_deal_products(deal_id)
-    pprint(products)
+    # pprint(products)
     product= await get_product(products['PRODUCT_ID'])
-    pprint(product)
+    # pprint(product)
 
     productName=product[Product.name]
     productPrice=products[Product.price]
