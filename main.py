@@ -1,4 +1,5 @@
 import asyncio
+from pprint import pprint
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -6,6 +7,7 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.shared import Inches
 from docx.enum.section import WD_ORIENTATION
+from datetime import datetime, timedelta
 
 def create_calculation_doc(
     stone_type="изумрудно-зеленый",
@@ -410,13 +412,17 @@ def create_calculation_html(
             height: 14px;
             background: url('data:image/svg+xml;utf8,<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 8.5L7 11.5L12 5.5" stroke="%23000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>') center center no-repeat;
         }}
+        /* Вертикальная граница после первой колонки только для первых трёх строк */
+        .main-table tr:nth-child(-n+3) td:first-child {{
+            border-right: 1.5px solid #333;
+        }}
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Индивидуальный расчет <span style="font-weight: normal;">под ваш проект</span></h1>
         
-        <table>
+        <table class="main-table">
             <tr>
                 <td style="width: 25%;">
                     <div class="stone-name">{stone_name}</div>
@@ -428,6 +434,7 @@ def create_calculation_html(
                             <td style="border:none;">
                                 <img src="{image_data['default']}" alt="Камень" style="width:130px; height:130px; object-fit:cover;"><br>
                             </td>
+                            <!--
                             <td style="border:none;">
                                 <img src="{image_data['dry']}" alt="Камень сухой" style="width:130px; height:130px; object-fit:cover;"><br>
                                 <span style="font-size:14px;">сухой</span>
@@ -440,6 +447,7 @@ def create_calculation_html(
                                 <img src="{image_data['lit']}" alt="Камень подсвеченный" style="width:130px; height:130px; object-fit:cover;"><br>
                                 <span style="font-size:14px;">подсвеченный</span>
                             </td>
+                            -->
                         </tr>
                     </table>
                 </td>
@@ -451,12 +459,10 @@ def create_calculation_html(
                     <div class="fraction">фракция</div>
                 </td>
                 <td>
-                    <div style="display: flex; justify-content: space-between;">
-                        <div style="font-size: 22px;">{fraction}</div>
-                        <div style="text-align: right;">
-                            *Ответственность за выбор<br>
-                            размера фракции несет клиент
-                        </div>
+                    <div style="font-size: 22px; display: inline-block; width: 35%;">{fraction}</div>
+                    <div style="text-align: right; display: inline-block; width: 55%; float: right;">
+                        *Ответственность за выбор<br>
+                        размера фракции несет клиент
                     </div>
                 </td>
             </tr>
@@ -474,7 +480,7 @@ def create_calculation_html(
             </tr>
             
             <tr>
-                <td style="vertical-align:top; padding-top: 5%;">
+                <td style="vertical-align:top; padding-top: 4.8%;">
                     <div class="price">Цена<br>за кг</div>
                     <div style="font-size: 22px; font-weight: bold;">{price_per_kg}</div>
                 </td>
@@ -527,6 +533,195 @@ def create_calculation_html(
     
     return output_path
 
+def replace_date_placeholder(pdf_path, output_path=None):
+    """
+    Заменяет текст "{дата+3}" на "21.03.25" в PDF файле
+    
+    Args:
+        pdf_path: Путь к PDF файлу
+        output_path: Путь для сохранения измененного файла (по умолчанию - pdf_path)
+    """
+    # Сначала пробуем использовать PyMuPDF для реального редактирования
+    try:
+        import fitz  # PyMuPDF
+        
+        print("Используем PyMuPDF для редактирования PDF...")
+        doc = fitz.open(pdf_path)
+        # Подключаем пользовательский шрифт Open Sans Medium, если доступен
+        try:
+            import os
+            font_path = os.path.join(os.path.dirname(__file__), "fonts", "open-sans-medium.ttf")
+            custom_fontname = None
+            if os.path.exists(font_path):
+                try:
+                    # Регистрируем шрифт под явным именем, чтобы гарантированно применился
+                    explicit_fontname = "opensans_medium"
+                    doc.insert_font(fontname=explicit_fontname, fontfile=font_path)
+                    custom_fontname = explicit_fontname
+                    print(f"Подключен шрифт: {font_path}")
+                except Exception as font_err:
+                    print(f"Не удалось подключить шрифт '{font_path}': {font_err}")
+            else:
+                print(f"Шрифт не найден: {font_path}, будет использован шрифт документа")
+        except Exception as path_err:
+            print(f"Ошибка подготовки пути к шрифту: {path_err}")
+            custom_fontname = None
+        
+        replacements_count = 0
+        for page_num in range(len(doc)):
+            page = doc[page_num]
+            text_instances = page.search_for("{дата+3}")
+            
+            if text_instances:
+                print(f"Найдена дата на странице {page_num + 1}, выполняем замену...")
+                for inst in text_instances:
+                    # Получаем информацию о текущем тексте для сохранения форматирования
+                    try:
+                        # Анализируем текущий текст для определения форматирования
+                        text_dict = page.get_text("dict")
+                        font_info = None
+                        
+                        # Ищем информацию о шрифте для данного текста
+                        for block in text_dict["blocks"]:
+                            if "lines" in block:
+                                for line in block["lines"]:
+                                    for span in line["spans"]:
+                                        if "{дата+3}" in span["text"]:
+                                            font_info = {
+                                                "font": span.get("font", "helv"),
+                                                "size": span.get("size", 24),
+                                                "color": span.get("color", 0),
+                                                "flags": span.get("flags", 0)
+                                            }
+                                            break
+                                    if font_info:
+                                        break
+                            if font_info:
+                                break
+                        
+                        # Если не удалось получить информацию о шрифте, используем значения по умолчанию
+                        if not font_info:
+                            font_info = {"font": "helv", "size": 24, "color": 0, "flags": 0}
+                        
+                        print(f"Используем форматирование: шрифт={font_info['font']}, размер={font_info['size']}")
+                        
+                        # Заменяем текст с сохранением форматирования
+                        page.add_redact_annot(inst, fill=(1, 1, 1))  # Белый фон
+                        page.apply_redactions()
+                        
+                        # Добавляем новый текст с оригинальным форматированием
+                        # Используем точную позицию и правильные параметры
+                        # inst.tl - top-left, inst.bl - bottom-left для лучшего позиционирования
+                        # Опускаем текст на 20pt вниз относительно исходной позиции
+                        text_pos = (inst.x0, inst.y0 + 25)
+                        nextDate = datetime.now()+ timedelta(days=4)
+                        print(nextDate.strftime("%d.%m.%y"))
+                        # Нормализуем цвет: PyMuPDF ожидает кортеж RGB (0..1)
+                        color_value = font_info.get("color", 0)
+                        if not isinstance(color_value, (tuple, list)):
+                            color_value = (0, 0, 0)
+                        page.insert_text(
+                            text_pos,
+                            nextDate.strftime("%d.%m.%y") ,
+                            fontname=(custom_fontname or font_info["font"]),
+                            fontsize=font_info["size"],
+                            color=color_value
+                        )
+                        
+                        replacements_count += 1
+                        print(f"Замена {replacements_count} выполнена на странице {page_num + 1} с сохранением форматирования")
+                        
+                    except Exception as format_error:
+                        print(f"Ошибка при сохранении форматирования: {format_error}")
+                        # Fallback: простая замена без сохранения форматирования
+                        page.add_redact_annot(inst, fill=(1, 1, 1))
+                        page.apply_redactions()
+                        # Опускаем текст на 20pt вниз относительно исходной позиции
+                        text_pos = (inst.x0, inst.y0 + 25)
+                        page.insert_text(
+                            text_pos,
+                            nextDate.strftime("%d.%m.%y"),
+                            fontname=(custom_fontname or "helv"),
+                            fontsize=24,
+                            color=(0, 0, 0)
+                        )
+                        replacements_count += 1
+                        print(f"Замена {replacements_count} выполнена на странице {page_num + 1} (без форматирования)") 
+        
+        if output_path is None:
+            output_path = pdf_path.replace('.pdf', '_updated.pdf')
+            
+        # Сохраняем в новый файл, чтобы избежать ошибки "save to original must be incremental"
+        doc.save(output_path, incremental=False)
+        doc.close()
+        
+        print(f"PDF файл сохранен с заменой: {output_path}")
+        print(f"Всего замен: {replacements_count}")
+        
+        # Проверяем результат
+        check_doc = fitz.open(output_path)
+        still_present = 0
+        for check_page_num in range(len(check_doc)):
+            check_text = check_doc[check_page_num].get_text()
+            if "{дата+3}" in check_text:
+                still_present += 1
+                print(f"ВНИМАНИЕ: Текст '{{дата+3}}' все еще присутствует на странице {check_page_num + 1}")
+        
+        check_doc.close()
+        
+        if still_present == 0:
+            print("✅ Замена успешно выполнена во всех местах!")
+        else:
+            print(f"⚠️ Замена выполнена частично: {still_present} страниц содержат старый текст")
+        
+        return output_path
+        
+    except ImportError:
+        print("PyMuPDF не установлен, используем pypdf...")
+    except Exception as e:
+        print(f"Ошибка при использовании PyMuPDF: {e}")
+        print("Переключаемся на pypdf...")
+    
+    # Fallback на pypdf (только для чтения и проверки)
+    try:
+        from pypdf import PdfReader, PdfWriter
+        
+        print("Используем pypdf для проверки PDF...")
+        reader = PdfReader(pdf_path)
+        
+        # Проверяем наличие текста для замены
+        found_pages = []
+        for page_num, page in enumerate(reader.pages):
+            page_text = page.extract_text()
+            if "{дата+3}" in page_text:
+                found_pages.append(page_num + 1)
+                print(f"Найдена дата на странице {page_num + 1}")
+        
+        if found_pages:
+            print(f"Текст '{{дата+3}}' найден на страницах: {found_pages}")
+            print("⚠️ Замена не может быть выполнена через pypdf")
+            print("💡 Рекомендуется установить PyMuPDF: pip install PyMuPDF")
+        else:
+            print("Текст '{дата+3}' не найден в PDF")
+        
+        # Создаем копию файла без изменений
+        if output_path is None:
+            output_path = pdf_path
+            
+        writer = PdfWriter()
+        for page in reader.pages:
+            writer.add_page(page)
+            
+        with open(output_path, "wb") as output_file:
+            writer.write(output_file)
+        
+        print(f"PDF файл сохранен без изменений: {output_path}")
+        return output_path
+        
+    except Exception as e:
+        print(f"Критическая ошибка при работе с PDF: {e}")
+        return None
+
 async def main(dealID):
     from workBitrix import get_all_info
     frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram= await get_all_info(dealID)
@@ -566,12 +761,29 @@ async def main(dealID):
     
     insert_html_page_to_pdf(
         html_path="индивидуальный_расчет.html",
-        
-        
+        # base_pdf_path="кп 3 вариант.pdf",
+        base_pdf_path="кп 3 вариант removed.pdf",
+        output_pdf_path="кп 3 вариант_с_вставкой.pdf",
+        # insert_after_page=1
     )
+    
+    # Заменяем "{дата+3}" на "21.03.25" в созданном PDF
+    updated_pdf_path = replace_date_placeholder("кп 3 вариант_с_вставкой.pdf")
+    if updated_pdf_path and updated_pdf_path != "кп 3 вариант_с_вставкой.pdf":
+        print(f"PDF с заменой даты сохранен в: {updated_pdf_path}")
+    else:
+        print("Замена даты не выполнена")
+    
+    # from workBitrix import upload_file_to_deal
+    # await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой.pdf")
+
     import os
+    pprint(images)
     for key, value in images.items():
-        os.remove(value)
+        try:
+            os.remove(value)
+        except Exception as e:
+            continue
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main(8342))

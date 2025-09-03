@@ -10,6 +10,7 @@ dependencies = [
     "fpdf2>=2.8.3",
     "loguru>=0.7.3",
     "pdfkit>=1.0.0",
+    "pymupdf>=1.26.4",
     "pypdf>=5.5.0",
     "python-docx>=1.1.2",
     "python-dotenv>=1.1.0",
