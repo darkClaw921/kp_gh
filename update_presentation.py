@@ -127,8 +127,8 @@ def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images
         '{Название товара}': productName,
         "{fract}": frakcia,
         "{Объем и вес}": obem_po_porametram,
-        "{Цена}": str(productPrice),
-        "{Стоимость}": str(opportunity),
+        "{Цена}": str(float(productPrice))+ " р.",
+        "{Стоимость}": str(float(opportunity))+ " р.",
         "{Доставка}": "с учетом доставки" if dostavka else "без учета доставки",
         "{Упаковка}": ypakovka,
        

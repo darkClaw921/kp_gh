@@ -166,6 +166,7 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
                                                                 'detailPicture':detailPicture,
                                                                 'previewPicture':previewPicture,
                                                                 'property160':property160,
+                                                                'measure':166,#кг
                                                                 }})
     return product
 
