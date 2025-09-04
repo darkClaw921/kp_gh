@@ -823,8 +823,8 @@ async def main(dealID):
     # else:
         # print("Замена даты не выполнена")
     
-    # from workBitrix import upload_file_to_deal
-    # await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой_updated.pdf")
+    from workBitrix import upload_file_to_deal
+    await upload_file_to_deal(dealID, output_pdf)
 
     import os
     pprint(images)

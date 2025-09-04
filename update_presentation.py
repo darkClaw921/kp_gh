@@ -11,6 +11,7 @@ import os
 from datetime import datetime, timedelta
 import pytz
 
+
 def replace_text_and_images_in_presentation(input_file, output_file, text_replacements, image_replacements):
     """
     Заменяет текст и изображения в презентации PowerPoint
@@ -110,6 +111,7 @@ def replace_text_and_images_in_presentation(input_file, output_file, text_replac
 
 def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram):
     """Основная функция"""
+    import os
     # Пути к файлам
     input_file = "КП - итоговый.pptx"
     output_file = "кп 3 вариант (1)_обновленный.pptx"
@@ -180,13 +182,13 @@ def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images
     else:
         print("\n❌ Операция завершилась с ошибкой!")
 
-    import os
+    
 
     input_pptx = "кп 3 вариант (1)_обновленный.pptx"
-    output_pdf = "output.pdf"
+    output_pdf = f"КП {date.strftime('%d.%m.%y')}_{productName}.pdf"
 
-    # command = f"unoconv -f pdf \"{input_pptx}\" -o \"{output_pdf}\""
-    # os.system(command)
+    command = f"unoconv -f pdf \"{input_pptx}\" -o \"{output_pdf}\""
+    os.system(command)
     return output_pdf
 
 if __name__ == "__main__":
