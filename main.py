@@ -504,8 +504,8 @@ def create_calculation_html(
                     <div class="fraction">фракция</div>
                 </td>
                 <td>
-                    <div style="font-size: 22px; display: inline-block; width: 35%;">{fraction}</div>
-                    <div style="text-align: right; display: inline-block; width: 55%; float: right;">
+                    <div style="font-size: 27px; display: inline-block; width: 35%;">{fraction}</div>
+                    <div style="font-size: 20px; text-align: right; display: inline-block; width: 55%; float: right;">
                         *Ответственность за выбор<br>
                         размера фракции несет клиент
                     </div>
@@ -769,8 +769,12 @@ def replace_date_placeholder(pdf_path, output_path=None):
 
 async def main(dealID):
     from workBitrix import get_all_info
+    from update_presentation import create_presentation
     frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram= await get_all_info(dealID)
     
+    output_pdf = create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images,productPrice,obem_po_porametram)
+    print(output_pdf)
+    # 1/0
 #     create_calculation_doc(
 #         stone_type="изумрудно-зеленый",
 #         fraction="70-150 мм",
@@ -787,40 +791,40 @@ async def main(dealID):
 
     # Генерация HTML-карточки с использованием скриншотов в качестве изображений
     # images_list = ["Снимок экрана 2025-04-07 в 14.49.01.png", "Снимок экрана 2025-04-07 в 14.49.15.png"]
-    create_calculation_html(
-        stone_name=productName,
-        # stone_type="изумрудно-зеленый",
-        stone_type="",
-        fraction=frakcia,
-        dimensions=obem_po_porametram,
-        volume='',
-        weight="", 
-        price_per_kg=productPrice, 
-        total_price=opportunity, 
-        delivery=dostavka, 
-        packaging=ypakovka,
-        images=images,
-        output_path="индивидуальный_расчет.html"
-    )
-    from insert_html_to_pdf import insert_html_page_to_pdf
+    # create_calculation_html(
+    #     stone_name=productName,
+    #     # stone_type="изумрудно-зеленый",
+    #     stone_type="",
+    #     fraction=frakcia,
+    #     dimensions=obem_po_porametram,
+    #     volume='',
+    #     weight="", 
+    #     price_per_kg=productPrice, 
+    #     total_price=opportunity, 
+    #     delivery=dostavka, 
+    #     packaging=ypakovka,
+    #     images=images,
+    #     output_path="индивидуальный_расчет.html"
+    # )
+    # from insert_html_to_pdf import insert_html_page_to_pdf
     
-    insert_html_page_to_pdf(
-        html_path="индивидуальный_расчет.html",
-        # base_pdf_path="кп 3 вариант.pdf",
-        base_pdf_path="кп 3 вариант removed.pdf",
-        output_pdf_path="кп 3 вариант_с_вставкой.pdf",
-        # insert_after_page=1
-    )
+    # insert_html_page_to_pdf(
+    #     html_path="индивидуальный_расчет.html",
+    #     # base_pdf_path="кп 3 вариант.pdf",
+    #     base_pdf_path="кп 3 вариант removed.pdf",
+    #     output_pdf_path="кп 3 вариант_с_вставкой.pdf",
+    #     # insert_after_page=1
+    # )
     
     # Заменяем "{дата+3}" на "21.03.25" в созданном PDF
-    updated_pdf_path = replace_date_placeholder("кп 3 вариант_с_вставкой.pdf")
-    if updated_pdf_path and updated_pdf_path != "кп 3 вариант_с_вставкой.pdf":
-        print(f"PDF с заменой даты сохранен в: {updated_pdf_path}")
-    else:
-        print("Замена даты не выполнена")
+    # updated_pdf_path = replace_date_placeholder("кп 3 вариант_с_вставкой.pdf")
+    # if updated_pdf_path and updated_pdf_path != "кп 3 вариант_с_вставкой.pdf":
+        # print(f"PDF с заменой даты сохранен в: {updated_pdf_path}")
+    # else:
+        # print("Замена даты не выполнена")
     
-    from workBitrix import upload_file_to_deal
-    await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой_updated.pdf")
+    # from workBitrix import upload_file_to_deal
+    # await upload_file_to_deal(dealID, "кп 3 вариант_с_вставкой_updated.pdf")
 
     import os
     pprint(images)

@@ -56,8 +56,8 @@ def insert_html_page_to_pdf(
     options = {
         'orientation': 'Landscape',
         # 'margin-top': '70mm',
-        'margin-top': '67mm',
-        'margin-bottom': '0mm',
+        'margin-top': '60mm',
+        # 'margin-bottom': '0mm',
         'margin-left': '0mm',
         'margin-right': '50mm',
         'enable-local-file-access': True,
