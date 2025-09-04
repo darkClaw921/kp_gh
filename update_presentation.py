@@ -137,9 +137,9 @@ def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images
     # Настройки замен изображений
     image_replacements = {
         "{image0}": (images['default'], 3, 3) if images['default'] else '',
-        "{image1}": (images['dry'], 3.52, 2.07) if images['dry'] else '',
-        "{image2}": (images['wet'], 3.52, 2.07) if images['wet'] else '',
-        "{image3}": (images['lit'], 3.52, 2.07) if images['lit'] else ''
+        "{image1}": (images['dry'], 3, 3) if images['dry'] else '',
+        "{image2}": (images['wet'], 3, 3) if images['wet'] else '',
+        "{image3}": (images['lit'], 3, 3) if images['lit'] else ''
     }
     
     print("=" * 60)
