@@ -187,9 +187,52 @@ def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images
     input_pptx = "кп 3 вариант (1)_обновленный.pptx"
     output_pdf = f"КП {date.strftime('%d.%m.%y')}_{productName}.pdf"
 
-    command = f"unoconv -f pdf \"{input_pptx}\" -o \"{output_pdf}\""
-    os.system(command)
-    return output_pdf
+    # Проверяем существование входного файла
+    if not os.path.exists(input_pptx):
+        print(f"Ошибка: Файл {input_pptx} не найден!")
+        return None
+
+    # Используем LibreOffice headless режим вместо unoconv
+    try:
+        import subprocess
+        # Команда для конвертации через LibreOffice
+        command = [
+            "libreoffice",
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", os.path.dirname(os.path.abspath(output_pdf)) or ".",
+            input_pptx
+        ]
+        
+        result = subprocess.run(command, capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0:
+            # LibreOffice создает файл с тем же именем, но с расширением .pdf
+            base_name = os.path.splitext(os.path.basename(input_pptx))[0]
+            generated_pdf = f"{base_name}.pdf"
+            
+            # Переименовываем в нужное имя
+            if os.path.exists(generated_pdf):
+                if generated_pdf != output_pdf:
+                    os.rename(generated_pdf, output_pdf)
+                print(f"PDF успешно создан: {output_pdf}")
+                return output_pdf
+            else:
+                print(f"Ошибка: PDF файл не был создан")
+                return None
+        else:
+            print(f"Ошибка конвертации: {result.stderr}")
+            return None
+            
+    except subprocess.TimeoutExpired:
+        print("Ошибка: Превышено время ожидания конвертации")
+        return None
+    except FileNotFoundError:
+        print("Ошибка: LibreOffice не найден. Установите LibreOffice или используйте альтернативный метод")
+        return None
+    except Exception as e:
+        print(f"Ошибка при конвертации: {e}")
+        return None
 
 if __name__ == "__main__":
     create_presentation()

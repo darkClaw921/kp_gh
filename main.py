@@ -824,9 +824,15 @@ async def main(dealID):
         # print("Замена даты не выполнена")
     
     from workBitrix import upload_file_to_deal
-    await upload_file_to_deal(dealID, output_pdf)
-
     import os
+    
+    # Проверяем существование PDF файла перед загрузкой
+    if output_pdf and os.path.exists(output_pdf):
+        await upload_file_to_deal(dealID, output_pdf)
+        print(f"Файл {output_pdf} успешно загружен в Bitrix")
+    else:
+        print(f"Ошибка: PDF файл {output_pdf} не найден или не был создан")
+        return
     pprint(images)
     for key, value in images.items():
         try:
