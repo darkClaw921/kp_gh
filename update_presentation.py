@@ -117,7 +117,7 @@ def create_presentation(frakcia,ypakovka,dostavka,opportunity,productName,images
     output_file = "кп 3 вариант (1)_обновленный.pptx"
     
     tz=pytz.timezone('Europe/Moscow')
-    date = datetime.now(tz) + timedelta(days=3)
+    date = datetime.now(tz) + timedelta(days=4)
     # Настройки замен текста
     # Иногда productName приходит с переносами строк и лишними пробелами, убираем их
     # Исправляем: убираем только переносы строк, но сохраняем пробелы между словами
