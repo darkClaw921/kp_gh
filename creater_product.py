@@ -21,6 +21,6 @@ async def main(fileName='items.json'):
         # return 0
 
 if __name__ == '__main__':
-    filename='items.json'
+    filename='items2.json'
     asyncio.run(main(fileName=filename))
 

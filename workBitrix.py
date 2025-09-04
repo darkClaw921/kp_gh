@@ -154,6 +154,12 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
                     str(encoded_file)
                 ]
             }
+        property160={
+                    'fileData': [
+                    os.path.basename(file_name_path),
+                    str(encoded_file)
+                ]
+            }
     else:
         detailPicture=file_name_path
         previewPicture=file_name_path
@@ -162,11 +168,11 @@ async def create_product(product_name,product_price,product_quantity,file_name_p
                                                                 'price': product_price, 
                                                                 'quantity': product_quantity, 
                                                                 'iblockId': 14, 
-                                                                'iblockSectionId':162, #торговый каталог/Изображения для кп/эрклез 
+                                                                'iblockSectionId':180, #торговый каталог/Изображения для кп/эрклез 
                                                                 'detailPicture':detailPicture,
                                                                 'previewPicture':previewPicture,
                                                                 'property160':property160,
-                                                                'measure':166,#кг
+                                                                'measure':7,#кг
                                                                 }})
     return product
 
